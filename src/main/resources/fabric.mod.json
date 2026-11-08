@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "voicefix",
+  "version": "${version}",
+  "name": "VoiceFix",
+  "description": "Microphone compatibility diagnostics for Simple Voice Chat on Fabric.",
+  "authors": ["VoiceFix"],
+  "contact": {"sources": "https://github.com/ahmetmerk779-png/Voicefix"},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {"client": ["com.voicefix.VoiceFixClient"]},
+  "depends": {"fabricloader": ">=0.18.1", "minecraft": "1.21.11", "java": ">=21", "fabric-api": "*"}
+}
