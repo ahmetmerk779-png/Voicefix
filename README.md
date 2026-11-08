@@ -1,51 +1,52 @@
 # VoiceFix
 
-VoiceFix is a client-side Fabric diagnostic mod for Minecraft **1.21.11**. It investigates Java Sound microphone capture compatibility, including:
+VoiceFix is a client-side Fabric mod for **Minecraft 1.21.11**, targeting **Android ARM64 on PojavLauncher**. It supplies a Java Sound SPI bridge for Simple Voice Chat.
 
-```
-No line matching interface TargetDataLine supporting format
-PCM_SIGNED 48000.0 Hz, 16 bit, mono, 2 bytes/frame,
-little-endian is supported.
-```
+## Audio backend
 
-## Features
+- Microphone capture through Android AAudio (mono, signed 16-bit PCM).
+- Speaker playback through Android OpenSL ES (mono/stereo, signed 16-bit PCM).
+- Java integration through `javax.sound.sampled.spi.MixerProvider`.
+- ARM64 `libaudioshim.so` bundled in the mod JAR and extracted automatically on first use.
 
-- Lists Java Sound devices that expose microphone capture lines.
-- Checks advertised PCM formats at 48 kHz, 44.1 kHz, 32 kHz, 22.05 kHz and 16 kHz.
-- Reports whether a device advertises the exact 48 kHz / 16-bit / mono format from the error.
-- Does not open the microphone or record audio.
-- Client-side only; it does not modify servers or other players.
+The implementation follows the Android Audio Shim architecture. Upstream project: https://github.com/Hhhrty2/android-audio-shim (MIT).
 
-## Commands
+## Requirements
 
-- `/voicefix scan` — scan microphone devices and supported capture formats.
-- `/voicefix help` — show command help.
-
-## Important limitation
-
-VoiceFix is a diagnostic and compatibility helper, not a replacement audio driver. Java Sound providers and operating-system permissions determine which capture formats are available. This initial version does not patch Simple Voice Chat's internal capture implementation or force an unsupported format.
-
-For Minecraft 1.21.11, install a current Simple Voice Chat Fabric release for that exact Minecraft version. The 2.6.8 release notes mention audio-device error-handling improvements; newer 1.21.11 releases are available. Never install a build for a different Minecraft version.
-
-If the scan finds no microphone input, check operating-system microphone privacy permission, the selected input device, and whether another application has exclusive control of the microphone.
-
-## Build
-
-Requirements: JDK 21 and Gradle 9.2.1.
-
-```bash
-gradle build
-```
-
-The mod JAR is generated in `build/libs/`.
+- Android 8.0+ (AAudio API 26+).
+- ARM64 / arm64-v8a.
+- PojavLauncher, Minecraft 1.21.11, Fabric Loader and a compatible Simple Voice Chat Fabric build.
+- Microphone permission granted to PojavLauncher in Android settings.
 
 ## Install
 
-1. Install Fabric Loader for Minecraft 1.21.11.
-2. Install Fabric API for Minecraft 1.21.11.
-3. Put `voicefix-1.0.0.jar` in the client `mods` folder.
-4. Launch the game and run `/voicefix scan`.
+1. Download the VoiceFix JAR from the GitHub Actions artifact.
+2. Put it in the instance `mods` folder.
+3. Launch Minecraft.
+4. Open Simple Voice Chat settings and select **Android AudioRecord** as the microphone.
+5. Test microphone and speaker.
+
+If Android blocks microphone access, grant the microphone permission to PojavLauncher in Android app settings. VoiceFix cannot grant Android permissions itself.
+
+If Simple Voice Chat reports errors from its optional desktop native backend, set `use_natives=false` in `voicechat-client.properties` if that option exists in your installed version. VoiceFix provides its own Java Sound bridge.
+
+## Build
+
+Requirements: JDK 21, Gradle 9.2.1 and Android NDK 27.2.12479018. Set `ANDROID_NDK_HOME`, then run:
+
+```bash
+gradle clean build
+```
+
+The JAR is generated in `build/libs/`; the native library is built for `arm64-v8a` and packaged under `natives/arm64-v8a/`.
+
+## Limitations
+
+- Android ARM64 only; x86 Android and desktop operating systems are not targeted.
+- Simple Voice Chat is the compatibility target; other voice mods are not guaranteed.
+- Android must grant PojavLauncher microphone permission.
+- A successful compile does not prove audio routing on every phone; real-device testing is required.
 
 ## License
 
-MIT
+MIT. The audio bridge is based on the MIT-licensed Android Audio Shim project by Hhhrty2. See the upstream repository for original attribution.
